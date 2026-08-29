@@ -439,7 +439,7 @@ function CustomerRow({
                     </div>
                 </TableCell>
 
-                <TableCell className="hidden whitespace-nowrap md:table-cell">
+                <TableCell>
                     {formatRxPower(
                         customer.onuReceivePower,
                     )}
