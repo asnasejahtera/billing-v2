@@ -1,32 +1,28 @@
-import { redirect } from "next/navigation";
+import type { ReactNode } from "react";
+
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { DashboardHeader } from "@/components/layout/dashboard-header";
-import { getCurrentUser } from "@/features/auth/services/current-user.service";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const user = await getCurrentUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
+}: {
+  children: ReactNode;
+}) {
   return (
-    <div className="min-h-svh bg-muted/20">
-      <div className="flex min-h-svh">
-        <AppSidebar />
+    <SidebarProvider>
+      <AppSidebar />
 
-        <div className="min-w-0 flex-1">
-          <DashboardHeader user={user} />
+      <SidebarInset>
+        <DashboardHeader />
 
-          <main className="p-4 sm:p-5 lg:p-6">
-            {children}
-          </main>
-        </div>
-      </div>
-    </div>
+        <main className="flex flex-1 flex-col p-4 md:p-6">
+          {children}
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

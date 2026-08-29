@@ -397,6 +397,7 @@ export async function listCustomers(
         lastLogoutAt: customers.lastLogoutAt,
         detail: customers.detail,
         lastSyncedAt: customers.lastSyncedAt,
+        onuReceivePower: customers.onuReceivePower,
       })
       .from(customers)
       .innerJoin(

@@ -82,6 +82,65 @@ export const customers = pgTable(
       length: 255,
     }),
 
+    onuPortId: integer("onu_port_id"),
+    onuId: integer("onu_id"),
+
+    onuName: varchar("onu_name", {
+      length: 150,
+    }),
+
+    onuMacAddress: varchar("onu_mac_address", {
+      length: 30,
+    }),
+
+    onuPonMacAddress: varchar("onu_pon_mac_address", {
+      length: 30,
+    }),
+
+    onuVlanId: integer("onu_vlan_id"),
+
+    onuStatus: varchar("onu_status", {
+      length: 30,
+    }),
+
+    onuReceivePower: varchar("onu_receive_power", {
+      length: 30,
+    }),
+
+    onuDistanceMeters: integer("onu_distance_meters"),
+
+    onuRtt: varchar("onu_rtt", {
+      length: 30,
+    }),
+
+    onuType: varchar("onu_type", {
+      length: 100,
+    }),
+
+    onuDeviceType: varchar("onu_device_type", {
+      length: 100,
+    }),
+
+    onuVendor: varchar("onu_vendor", {
+      length: 100,
+    }),
+
+    onuLastDownReason: varchar("onu_last_down_reason", {
+      length: 255,
+    }),
+
+    onuRegisterTime: varchar("onu_register_time", {
+      length: 100,
+    }),
+
+    onuLastDownTime: varchar("onu_last_down_time", {
+      length: 100,
+    }),
+
+    onuMatchedAt: timestamp("onu_matched_at", {
+      withTimezone: true,
+    }),
+
     status: varchar("status", { length: 20 })
       .$type<CustomerStatus>()
       .notNull()

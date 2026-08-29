@@ -190,6 +190,10 @@ export function CustomerTableRow({
                                 customer.name,
                             ],
                             [
+                                "Nama Customer",
+                                customer.name,
+                            ],
+                            [
                                 "Phone",
                                 customer.phone,
                             ],

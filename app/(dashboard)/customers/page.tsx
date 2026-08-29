@@ -16,6 +16,7 @@ import {
     type CustomerTableData,
 } from "@/features/customers/components/customers-table";
 import { SyncCustomers } from "@/features/customers/components/sync-customers";
+import { SyncOltCustomers } from "@/features/customers/components/sync-olt-customers";
 import {
     listCustomerPlanOptionsService,
     listCustomersService,
@@ -303,6 +304,9 @@ export default async function CustomersPage({
                 lastCallerId:
                     customer.lastCallerId,
 
+                onuReceivePower:
+                    customer.onuReceivePower,
+
                 status:
                     customer.status,
 
@@ -360,6 +364,8 @@ export default async function CustomersPage({
                             routers
                         }
                     />
+
+                    <SyncOltCustomers />
 
                     <Link
                         href="/customers/new"

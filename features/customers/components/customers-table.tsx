@@ -81,6 +81,7 @@ export type CustomerTableData = {
     isOnline: boolean;
     uptime: string | null;
     lastCallerId: string | null;
+    onuReceivePower: string | null;
 
     status:
     | "ACTIVE"
@@ -130,6 +131,20 @@ type Props = {
         pageSize?: string;
     };
 };
+
+function formatRxPower(
+    value: string | null,
+) {
+    if (!value) return "-";
+
+    const power = Number(value);
+
+    if (!Number.isFinite(power)) {
+        return "-";
+    }
+
+    return `${power.toFixed(2)} dBm`;
+}
 
 export function CustomersTable({
     customers,
@@ -256,7 +271,9 @@ export function CustomersTable({
                                     )}
                                 />
                             </TableHead>
-
+                            <TableHead className="hidden md:table-cell">
+                                Redaman
+                            </TableHead>
                             <TableHead>
                                 Phone
                             </TableHead>
@@ -420,6 +437,12 @@ function CustomerRow({
                             </p>
                         </div>
                     </div>
+                </TableCell>
+
+                <TableCell className="hidden whitespace-nowrap md:table-cell">
+                    {formatRxPower(
+                        customer.onuReceivePower,
+                    )}
                 </TableCell>
 
                 {/* PHONE */}
@@ -712,6 +735,13 @@ function CustomerRow({
                                                 customer.pppoeUsername
                                             }
                                             mono
+                                        />
+
+                                        <DetailItem
+                                            label="Redaman"
+                                            value={
+                                                `${customer.onuReceivePower} dBm`
+                                            }
                                         />
 
                                         <DetailPasswordItem

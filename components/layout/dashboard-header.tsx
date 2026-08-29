@@ -1,53 +1,154 @@
-import { MobileSidebar } from "@/components/layout/mobile-sidebar";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { LogoutButton } from "@/features/auth/components/logout-button";
-import type { AuthenticatedUser } from "@/features/auth/services/auth.service";
 
-type DashboardHeaderProps = {
-  user: AuthenticatedUser;
+const routeLabels: Record<string, string> = {
+  dashboard: "Dashboard",
+  routers: "Router",
+  plans: "Paket Internet",
+  customers: "Customer",
+  invoices: "Invoice",
+  payments: "Pembayaran",
+  network: "Network",
+  topology: "Topologi",
 };
 
-export function DashboardHeader({
-  user,
-}: DashboardHeaderProps) {
-  const initial =
-    user.name.charAt(0).toUpperCase();
+export function DashboardHeader() {
+  const pathname = usePathname();
+
+  const segments = pathname
+    .split("/")
+    .filter(Boolean);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center border-b bg-background/95 px-4 backdrop-blur lg:px-6">
-      <div className="lg:hidden">
-        <MobileSidebar />
-      </div>
+    <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-4 backdrop-blur">
+      <SidebarTrigger className="-ml-1" />
 
-      <div className="ml-3 min-w-0 lg:ml-0">
-        <p className="truncate text-sm font-medium">
-          Billing & Network
-        </p>
+      <Separator
+        orientation="vertical"
+        className="mr-2 h-4"
+      />
 
-        <p className="hidden text-xs text-muted-foreground sm:block">
-          Kelola pelanggan, jaringan, dan pembayaran.
-        </p>
-      </div>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem className="hidden sm:block">
+            <BreadcrumbLink
+              render={
+                <Link href="/dashboard" />
+              }
+            >
+              Billing MikroTik
+            </BreadcrumbLink>
+          </BreadcrumbItem>
 
-      <div className="ml-auto flex items-center gap-1">
+          {segments.length > 0 && (
+            <BreadcrumbSeparator className="hidden sm:block" />
+          )}
+
+          {segments.map(
+            (
+              segment,
+              index,
+            ) => {
+              const last =
+                index ===
+                segments.length - 1;
+
+              const href =
+                "/" +
+                segments
+                  .slice(
+                    0,
+                    index + 1,
+                  )
+                  .join("/");
+
+              const numeric =
+                /^\d+$/.test(
+                  segment,
+                );
+
+              const label =
+                numeric
+                  ? `#${segment}`
+                  : routeLabels[
+                  segment
+                  ] ??
+                  formatLabel(
+                    segment,
+                  );
+
+              return (
+                <BreadcrumbItem
+                  key={href}
+                  className={
+                    !last
+                      ? "hidden md:flex"
+                      : undefined
+                  }
+                >
+                  {last ? (
+                    <BreadcrumbPage>
+                      {label}
+                    </BreadcrumbPage>
+                  ) : (
+                    <>
+                      <BreadcrumbLink
+                        render={
+                          <Link
+                            href={
+                              href
+                            }
+                          />
+                        }
+                      >
+                        {
+                          label
+                        }
+                      </BreadcrumbLink>
+
+                      <BreadcrumbSeparator />
+                    </>
+                  )}
+                </BreadcrumbItem>
+              );
+            },
+          )}
+        </BreadcrumbList>
+      </Breadcrumb>
+      <div className="ml-auto flex">
         <ThemeToggle />
-
-        <div className="mx-2 hidden text-right sm:block">
-          <p className="max-w-40 truncate text-sm font-medium">
-            {user.name}
-          </p>
-
-          <p className="text-xs text-muted-foreground">
-            {user.role}
-          </p>
-        </div>
-
-        <div className="mr-1 flex size-9 items-center justify-center rounded-full bg-muted text-sm font-semibold">
-          {initial}
-        </div>
-
         <LogoutButton />
       </div>
     </header>
   );
+}
+
+function formatLabel(
+  value: string,
+) {
+  return value
+    .replace(
+      /-/g,
+      " ",
+    )
+    .replace(
+      /\b\w/g,
+      (letter) =>
+        letter.toUpperCase(),
+    );
 }
