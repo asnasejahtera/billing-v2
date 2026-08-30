@@ -84,7 +84,7 @@ const navigation = [
       },
       {
         title: "Topologi",
-        href: "/network-topology",
+        href: "/network-map",
         icon: Network,
       },
     ],

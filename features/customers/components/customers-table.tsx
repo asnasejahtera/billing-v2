@@ -271,7 +271,7 @@ export function CustomersTable({
                                     )}
                                 />
                             </TableHead>
-                            <TableHead className="hidden md:table-cell">
+                            <TableHead>
                                 Redaman
                             </TableHead>
                             <TableHead>
