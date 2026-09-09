@@ -6,12 +6,14 @@ type RouteInfoWindowContentOptions = {
   targetCode: string;
   lengthMeters: number;
   waypointCount: number;
+  onEditRequest: (linkId: number) => void;
   onAddWaypoint: () => void;
   onDeleteRequest: (link: {
     id: number;
     sourceCode: string;
     targetCode: string;
   }) => void;
+  onManageFiberCores:(linkId:number)=>void;
 };
 
 /*
@@ -28,7 +30,9 @@ export function createRouteInfoWindowContent({
   lengthMeters,
   waypointCount,
   onAddWaypoint,
+  onEditRequest,
   onDeleteRequest,
+  onManageFiberCores
 }: RouteInfoWindowContentOptions) {
   /* =========================
    * HEADER
@@ -78,6 +82,30 @@ export function createRouteInfoWindowContent({
     "h-8 w-full rounded-md border px-3 text-xs font-medium hover:bg-neutral-50";
   addButton.textContent = "Tambah Waypoint";
 
+  const editButton = document.createElement("button");
+  editButton.type = "button";
+  editButton.className =
+    "h-8 w-full rounded-md border px-3 text-xs font-medium hover:bg-neutral-50";
+  editButton.textContent = "Edit Jalur";
+
+  const coreButton=document.createElement("button");
+  coreButton.type="button";
+  coreButton.className="h-8 rounded-md border px-3 text-xs font-medium hover:bg-neutral-50";
+  coreButton.textContent="Kelola Core";
+
+  const handleManageCore=(event:MouseEvent)=>{
+    event.preventDefault();
+    event.stopPropagation();
+    onManageFiberCores(linkId);
+  };
+
+  coreButton.addEventListener("click",handleManageCore);
+    const handleEdit = (event: MouseEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onEditRequest(linkId);
+    };
+
   const deleteButton = document.createElement("button");
   deleteButton.type = "button";
   deleteButton.className =
@@ -96,9 +124,10 @@ export function createRouteInfoWindowContent({
     onDeleteRequest({ id: linkId, sourceCode, targetCode });
   };
 
+  editButton.addEventListener("click",handleEdit);
   addButton.addEventListener("click", handleAdd);
   deleteButton.addEventListener("click", handleDelete);
-  actions.append(addButton, deleteButton);
+  actions.append(coreButton, editButton, addButton, deleteButton);
   root.append(title, detail, actions);
 
   return {
@@ -106,7 +135,9 @@ export function createRouteInfoWindowContent({
     element: root,
     cleanup: () => {
       addButton.removeEventListener("click", handleAdd);
+      editButton.removeEventListener("click",handleEdit);
       deleteButton.removeEventListener("click", handleDelete);
+      coreButton.removeEventListener("click", handleManageCore);
     },
   };
 }

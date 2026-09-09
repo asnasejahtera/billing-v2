@@ -1,6 +1,8 @@
 import type {
   NetworkTopologyNodeType,
 } from "@/db/schema/network-topology-nodes";
+import type {NetworkMapPortSummary} from "./network-map-persistence.types";
+import type {NetworkMapCustomerInfo} from "./network-map-persistence.types";
 
 export type NetworkMapNodeDto = {
   id: number;
@@ -77,9 +79,16 @@ export type ToolMode =
 export type TemporaryNode = {
   id: number;
   code: string;
+  name?: string;
+  nodeType: string;
+  status?: string;
+  address?: string | null;
+  description?: string | null;
   position: Coordinate;
   element: HTMLDivElement;
+  portSummary:NetworkMapPortSummary;
   remove: () => void;
+  customerInfo:NetworkMapCustomerInfo|null;
 };
 
 /*
@@ -117,3 +126,15 @@ export type SelectedWaypoint = {
   index: number;
   position: Coordinate;
 };
+
+/*
+ * =========================
+ * MAP SEARCH RESULT
+ * =========================
+ */
+export type NetworkMapSearchResult = {
+  id: number;
+  code: string;
+  position: Coordinate;
+};
+

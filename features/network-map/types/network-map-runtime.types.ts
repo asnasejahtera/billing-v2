@@ -5,7 +5,16 @@ import type {
   MapController,
   SelectedWaypoint,
   ToolMode,
+  NetworkMapSearchResult,
 } from "./network-map.types";
+
+import type {
+  NetworkMapLinkDraft,
+  NetworkMapLinkDto,
+  NetworkMapNodeDto,
+  NetworkMapPortSummary
+} from "./network-map-persistence.types";
+
 
 /*
  * =========================
@@ -53,7 +62,17 @@ export type NetworkMapActionBridge = {
   deleteSelectedNode: ((nodeId: number) => void) | null;
   deleteWaypoint: ((linkId: number, waypointIndex: number) => void) | null;
   deleteSelectedLink: ((linkId: number) => void) | null;
+  searchNodes: ((query: string) => NetworkMapSearchResult[]) | null;
+  focusNode: ((nodeId: number) => void) | null;
+
+  addPersistedNode: ((node: NetworkMapNodeDto) => void) | null;
+  updatePersistedNode: ((node: NetworkMapNodeDto) => void) | null;
+  updateNodePortSummary:
+  |((nodeId:number,portSummary:NetworkMapPortSummary)=>void)
+  |null;
 };
+
+export type NetworkMapNodePositionUpdateResult =| {success: true;position: Coordinate;}| {success: false;message: string;};
 
 /*
  * =========================
@@ -81,13 +100,26 @@ export type NetworkMapEngineCallbacks = {
       | null
       | ((current: SelectedWaypoint | null) => SelectedWaypoint | null),
   ) => void;
+  persistNodePosition: (input: {
+    id: number;
+    position: Coordinate;
+  }) => Promise<NetworkMapNodePositionUpdateResult>;requestEditNode: (node: NetworkMapNodeEditTarget) => void;
+  requestEditLink: (linkId: number) => void;
+  requestCreateNode: (coordinate: Coordinate) => void;
   requestDeleteNode: (node: { id: number; code: string }) => void;
+  requestCreateLink: (draft: NetworkMapLinkDraft) => Promise<NetworkMapLinkDto | null>;
   requestDeleteWaypoint: (waypoint: { linkId: number; index: number }) => void;
+  requestNodeDetail:(node:NetworkMapNodeDetailTarget)=>void;
   requestDeleteLink: (link: {
     id: number;
     sourceCode: string;
     targetCode: string;
   }) => void;
+  persistLinkWaypoints: (input: {
+    linkId: number;
+    waypoints: Coordinate[];
+  }) => Promise<PersistLinkWaypointsResult>;
+  requestManageFiberCores:(linkId:number)=>void;
 };
 
 /*
@@ -99,4 +131,41 @@ export type NetworkMapEngine = {
   map: MapController;
   actions: NetworkMapActionBridge;
   destroy: () => void;
+};
+
+export type PersistLinkWaypointsResult =
+  | {
+      success: true;
+      waypoints: Coordinate[];
+      routeLengthMeters: number;
+    }
+  | {
+      success: false;
+      message: string;
+    };
+
+  /*
+ * =========================
+ * NODE DETAIL TARGET
+ * =========================
+ */
+export type NetworkMapNodeDetailTarget={
+  id:number;
+  code:string;
+  name:string;
+  nodeType:string;
+  status:string;
+  position:Coordinate;
+  address:string|null;
+  description:string|null;
+};
+
+export type NetworkMapNodeEditTarget={
+  id:number;
+  code:string;
+  name:string;
+  nodeType:string;
+  status:string;
+  address:string|null;
+  description:string|null;
 };
