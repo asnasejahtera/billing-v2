@@ -11,3 +11,12 @@ export * from "./fiber-cables";
 export * from "./network-topology-links";
 export * from "./fiber-core-connections";
 export * from "./network-topology-ports";
+/**
+ * ============================================
+ * WHATSAPP
+ * ============================================
+ */
+export * from "./whatsapp";
+export * from "./whatsapp-connection-commands";
+export * from "./whatsapp-messages";
+export * from "./whatsapp-message-templates";

@@ -12,6 +12,8 @@ import {
   ReceiptText,
   Router,
   Users,
+  MessageCircle,
+  Send
 } from "lucide-react";
 
 import {
@@ -66,6 +68,21 @@ const navigation = [
         title: "Pembayaran",
         href: "/payments",
         icon: CreditCard,
+      },
+    ],
+  },
+  {
+    title: "Pesan",
+    items: [
+      {
+        title: "Whatsapp",
+        href: "/whatsapp",
+        icon: MessageCircle,
+      },
+      {
+        title: "Kirim Pesan",
+        href: "/whatsapp/customer-messages",
+        icon: Send,
       },
     ],
   },

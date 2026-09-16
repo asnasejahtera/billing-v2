@@ -52,6 +52,8 @@ import type {
     NetworkMapEngine,
     NetworkMapNodeDetailTarget,
     NetworkMapNodeEditTarget,
+    NetworkMapNodeTypeFilter,
+    NetworkMapNodeStatusFilter
 } from "../types/network-map-runtime.types";
 
 import type {
@@ -67,6 +69,8 @@ import { updateNetworkTopologyLinkWaypointsAction } from "../actions/update-netw
 import { deleteNetworkTopologyLinkAction } from "../actions/delete-network-topology-link.action";
 
 import { NetworkMapToolbar } from "./network-map-toolbar";
+import { NetworkMapNodeFilter } from "./network-map-node-filter";
+import { NetworkMapStatusFilter } from "./network-map-status-filter";
 import { NetworkMapSearch } from "./network-map-search";
 import { CreateNetworkNodeDialog } from "./create-network-node-dialog";
 import { EditNetworkNodeDialog } from "./edit-network-node-dialog";
@@ -106,6 +110,8 @@ export function NetworkGoogleMap({ initialNodes, initialLinks, createOptions }: 
         addPersistedNode: null,
         updatePersistedNode: null,
         updateNodePortSummary: null,
+        filterNodeType: null,
+        filterNodeStatus: null
     });
 
     // MAP ENGINE RUNTIME
@@ -134,7 +140,8 @@ export function NetworkGoogleMap({ initialNodes, initialLinks, createOptions }: 
     const [, setSelectedWaypoint] = useState<SelectedWaypoint | null>(null);
     const [pendingDeleteLink, setPendingDeleteLink] = useState<{ id: number; sourceCode: string; targetCode: string; } | null>(null);
     const [pendingDeleteNode, setPendingDeleteNode] = useState<{ id: number; code: string; } | null>(null);
-
+    const [nodeTypeFilter, setNodeTypeFilter] = useState<NetworkMapNodeTypeFilter>("ALL");
+    const [nodeStatusFilter, setNodeStatusFilter] = useState<NetworkMapNodeStatusFilter>("ALL");
     /*
     * =========================
     * CREATE NODE DIALOG
@@ -392,6 +399,8 @@ export function NetworkGoogleMap({ initialNodes, initialLinks, createOptions }: 
                 addPersistedNode: null,
                 updatePersistedNode: null,
                 updateNodePortSummary: null,
+                filterNodeType: null,
+                filterNodeStatus: null,
             };
         };
     }, [initialNodes]);
@@ -606,6 +615,24 @@ export function NetworkGoogleMap({ initialNodes, initialLinks, createOptions }: 
         actionsRef.current.updatePersistedNode?.(node);
         setPendingEditNode(null);
     }
+
+    function handleNodeTypeFilter(value: NetworkMapNodeTypeFilter) {
+        setNodeTypeFilter(value);
+        actionsRef.current.filterNodeType?.(
+            value,
+        );
+    }
+
+    /*
+    * =========================
+    * STATUS FILTER
+    * =========================
+    */
+    function handleNodeStatusFilter(value: NetworkMapNodeStatusFilter,) {
+        setNodeStatusFilter(value);
+        actionsRef.current.filterNodeStatus?.(value);
+    }
+
     return (
         <div>
             <div className="flex max-w-full items-center overflow-x-auto pb-1">
@@ -623,6 +650,16 @@ export function NetworkGoogleMap({ initialNodes, initialLinks, createOptions }: 
                 <NetworkMapSearch
                     onSearch={handleSearchNodes}
                     onSelect={handleSelectSearchNode}
+                />
+                <NetworkMapNodeFilter
+                    value={nodeTypeFilter}
+                    disabled={toolMode !== "NORMAL"}
+                    onChange={handleNodeTypeFilter}
+                />
+                <NetworkMapStatusFilter
+                    value={nodeStatusFilter}
+                    disabled={toolMode !== "NORMAL"}
+                    onChange={handleNodeStatusFilter}
                 />
             </div>
 

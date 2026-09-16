@@ -67,9 +67,9 @@ export type NetworkMapActionBridge = {
 
   addPersistedNode: ((node: NetworkMapNodeDto) => void) | null;
   updatePersistedNode: ((node: NetworkMapNodeDto) => void) | null;
-  updateNodePortSummary:
-  |((nodeId:number,portSummary:NetworkMapPortSummary)=>void)
-  |null;
+  updateNodePortSummary:|((nodeId:number,portSummary:NetworkMapPortSummary)=>void)|null;
+  filterNodeType:|((type:NetworkMapNodeTypeFilter)=>void)|null;
+  filterNodeStatus:|((status:NetworkMapNodeStatusFilter)=>void)|null;
 };
 
 export type NetworkMapNodePositionUpdateResult =| {success: true;position: Coordinate;}| {success: false;message: string;};
@@ -169,3 +169,29 @@ export type NetworkMapNodeEditTarget={
   address:string|null;
   description:string|null;
 };
+
+/*
+ * =========================
+ * MAP NODE FILTER
+ * =========================
+ */
+export type NetworkMapNodeTypeFilter=
+  |"ALL"
+  |"ROUTER"
+  |"OLT"
+  |"ODC"
+  |"ODP"
+  |"CUSTOMER"
+  |"POLE";
+
+/*
+ * =========================
+ * NODE STATUS FILTER
+ * =========================
+ */
+export type NetworkMapNodeStatusFilter=
+  |"ALL"
+  |"ACTIVE"
+  |"INACTIVE"
+  |"MAINTENANCE"
+  |"DAMAGED";

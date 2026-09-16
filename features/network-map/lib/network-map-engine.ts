@@ -10,6 +10,8 @@ import type {
   NetworkMapActionBridge,
   NetworkMapEngine,
   NetworkMapEngineCallbacks,
+  NetworkMapNodeTypeFilter,
+  NetworkMapNodeStatusFilter,
   SelectedWaypointMarker as RuntimeSelectedWaypointMarker,
   TemporaryLink as RuntimeTemporaryLink,
 } from "../types/network-map-runtime.types";
@@ -113,6 +115,8 @@ export async function createNetworkMapEngine({
     addPersistedNode: null,
     updatePersistedNode: null,
     updateNodePortSummary: null,
+    filterNodeType:null,
+    filterNodeStatus:null,
   };
 
   /*
@@ -191,6 +195,7 @@ export async function createNetworkMapEngine({
   const routeInfoWindow = new InfoWindow();
   let routeInfoContentCleanup: (() => void) | null = null;
   let routeInfoPosition: Coordinate | null = null;
+
   /*
   * =========================
   * CLOSE ROUTE INFO CONTENT
@@ -202,6 +207,7 @@ export async function createNetworkMapEngine({
     routeInfoContentCleanup?.();
     routeInfoContentCleanup = null;
   }
+
   /*
   * =========================
   * ROUTE INFO WINDOW CLEANUP
@@ -224,6 +230,115 @@ export async function createNetworkMapEngine({
   const nodeMarkers: Array<
     InstanceType<typeof AdvancedMarkerElement>
   > = [];
+
+  /*
+  * =========================
+  * NODE FILTER STATE
+  * =========================
+  */
+  let activeNodeTypeFilter:NetworkMapNodeTypeFilter="ALL";
+  let activeNodeStatusFilter:NetworkMapNodeStatusFilter="ALL";
+
+  function isNodeVisible(
+    nodeType:string|undefined,
+    status:string|undefined,
+  ){
+    const typeVisible=
+      activeNodeTypeFilter==="ALL"||
+      nodeType===activeNodeTypeFilter;
+
+    const statusVisible=
+      activeNodeStatusFilter==="ALL"||
+      status===activeNodeStatusFilter;
+
+    return typeVisible&&statusVisible;
+  }
+
+  /*
+  * =========================
+  * APPLY NODE FILTERS
+  * =========================
+  */
+  function applyNodeFilters(){
+    nodes.forEach((node,index)=>{
+      const marker=nodeMarkers[index];
+      if(!marker) return;
+
+      marker.map=
+        isNodeVisible(
+          node.nodeType,
+          node.status,
+        )
+          ?map
+          :null;
+    });
+
+    /*
+    * Selected node ikut ditutup bila
+    * tidak lagi terlihat.
+    */
+    if(
+      selectedNodeInternal&&
+      !isNodeVisible(
+        selectedNodeInternal.nodeType,
+        selectedNodeInternal.status,
+      )
+    ){
+      selectedNodeInternal.element.style.background="#2563eb";
+      selectedNodeInternal=null;
+      closeNodeInfoContent();
+      nodeInfoWindow.close();
+    }
+
+    /*
+    * Jalur mengikuti visibility endpoint.
+    */
+    applyLinkFilters();
+  }
+
+  /*
+  * =========================
+  * LINK FILTER VISIBILITY
+  * =========================
+  * Link hanya tampil jika source dan target
+  * sama-sama terlihat oleh filter node.
+  */
+  function isLinkVisible(link:TemporaryLink){
+    return (
+      isNodeVisible(
+        link.sourceNode.nodeType,
+        link.sourceNode.status,
+      )&&
+      isNodeVisible(
+        link.targetNode.nodeType,
+        link.targetNode.status,
+      )
+    );
+  }
+
+  /*
+  * =========================
+  * APPLY LINK FILTERS
+  * =========================
+  */
+  function applyLinkFilters(){
+    /*
+    * Jika route selected menjadi tersembunyi,
+    * tutup InfoWindow dan waypoint marker.
+    */
+    if(
+      selectedLinkInternal&&
+      !isLinkVisible(selectedLinkInternal)
+    ){
+      clearRouteSelection();
+    }
+
+    for(const link of links){
+      link.polyline.setMap(
+        isLinkVisible(link)?map:null,
+      );
+    }
+  }
 
   /*
   * =========================
@@ -1521,7 +1636,7 @@ export async function createNetworkMapEngine({
     };
 
     const marker = new AdvancedMarkerElement({
-      map,
+      map:isNodeVisible(nodeType, status) ?map:null,
       position,
       content: element,
       title: name || code,
@@ -1781,6 +1896,7 @@ export async function createNetworkMapEngine({
     */
     updateConnectedLinks(node);
 
+    applyNodeFilters();
     /*
     * Jika node sedang dipilih,
     * refresh InfoWindow tanpa pan map.
@@ -1862,25 +1978,93 @@ export async function createNetworkMapEngine({
   * =========================
   * SEARCH NODES
   * =========================
-  * Search ringan langsung dari runtime registry.
+  * Search langsung dari runtime registry.
+  * Mendukung code, name, dan node type.
   */
-  function searchNodes(query: string) {
-    const keyword = query.trim().toLowerCase();
-    if (!keyword) return [];
+  function searchNodes(query:string){
+    const keyword=query.trim().toLowerCase();
+    if(!keyword) return [];
 
     return nodes
-      .filter((node) =>
-        node.code.toLowerCase().includes(keyword),
-      )
-      .slice(0, 10)
-      .map((node) => ({
-        id: node.id,
-        code: node.code,
-        position: { ...node.position },
+      .filter((node)=>{
+        const code=node.code.toLowerCase();
+        const name=(node.name??"").toLowerCase();
+        const nodeType=(node.nodeType??"").toLowerCase();
+
+        return (
+          code.includes(keyword)||
+          name.includes(keyword)||
+          nodeType.includes(keyword)
+        );
+      })
+      .sort((a,b)=>{
+        const aCode=a.code.toLowerCase();
+        const bCode=b.code.toLowerCase();
+        const aName=(a.name??"").toLowerCase();
+        const bName=(b.name??"").toLowerCase();
+
+        /* Exact code paling atas. */
+        if(aCode===keyword&&bCode!==keyword) return -1;
+        if(bCode===keyword&&aCode!==keyword) return 1;
+
+        /* Code yang diawali keyword berikutnya. */
+        const aCodeStart=aCode.startsWith(keyword);
+        const bCodeStart=bCode.startsWith(keyword);
+
+        if(aCodeStart&&!bCodeStart) return -1;
+        if(bCodeStart&&!aCodeStart) return 1;
+
+        /* Nama yang diawali keyword berikutnya. */
+        const aNameStart=aName.startsWith(keyword);
+        const bNameStart=bName.startsWith(keyword);
+
+        if(aNameStart&&!bNameStart) return -1;
+        if(bNameStart&&!aNameStart) return 1;
+
+        return a.code.localeCompare(b.code);
+      })
+      .slice(0,10)
+      .map((node)=>({
+        id:node.id,
+        code:node.code,
+        position:{...node.position},
       }));
   }
-  actions.searchNodes = searchNodes;
 
+  actions.searchNodes=searchNodes;
+
+  /*
+  * =========================
+  * FILTER NODE TYPE
+  * =========================
+  */
+  function filterNodeType(
+    type:NetworkMapNodeTypeFilter,
+  ){
+    if(currentMode!=="NORMAL") return;
+
+    activeNodeTypeFilter=type;
+    applyNodeFilters();
+  }
+
+  actions.filterNodeType=filterNodeType;
+
+  /*
+  * =========================
+  * FILTER NODE STATUS
+  * =========================
+  */
+  function filterNodeStatus(
+    status:NetworkMapNodeStatusFilter,
+  ){
+    if(currentMode!=="NORMAL") return;
+
+    activeNodeStatusFilter=status;
+    applyNodeFilters();
+  }
+
+  actions.filterNodeStatus=filterNodeStatus;
+  
   /*
   * =========================
   * FOCUS SEARCHED NODE
