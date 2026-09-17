@@ -1741,6 +1741,9 @@ export async function createNetworkMapEngine({
     const markerDragStart = marker.addListener(
       "dragstart",
       () => {
+         isNodeDragging=true;
+         touchStart=null;
+
         if (currentMode !== "NORMAL") return;
 
         positionBeforeDrag = {
@@ -1784,6 +1787,10 @@ export async function createNetworkMapEngine({
     const markerDragEnd = marker.addListener(
       "dragend",
       async (event:any) => {
+        suppressClickUntil=Date.now()+500;
+        isNodeDragging=false;
+        touchStart=null;
+        
         if (
           currentMode !== "NORMAL" ||
           !event.latLng
