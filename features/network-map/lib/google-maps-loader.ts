@@ -8,8 +8,7 @@ let configured = false;
 function configureGoogleMaps() {
   if (configured) return;
 
-  const apiKey =
-    process.env.GOOGLE_MAPS_API_KEY;
+  const apiKey = "AIzaSyBDD4lrYzv2d5xihld0InRiGXxn4ILJQSA";
 
   if (!apiKey) {
     throw new Error(
@@ -36,8 +35,5 @@ export async function loadMarkerLibrary() {
 }
 
 export function getGoogleMapsMapId() {
-  return (
-    process.env.GOOGLE_MAPS_MAP_ID ||
-    "DEMO_MAP_ID"
-  );
+  return ("4cfb869e2eca19db4cb4fc2b");
 }
