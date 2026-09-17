@@ -1618,7 +1618,7 @@ export async function createNetworkMapEngine({
     customerInfo=null,
     portSummary,
   }: CreateRuntimeNodeInput) {
-    const element = createNodeElement(nodeType);
+    const element = createNodeElement(nodeType, code);
 
     const node: TemporaryNode = {
       id,
@@ -1648,12 +1648,19 @@ export async function createNetworkMapEngine({
 
     /*
     * =========================
-    * NODE CLICK
+    * NODE CLICK / MOBILE TAP
     * =========================
+    * AdvancedMarkerElement menggunakan
+    * gmp-click agar tap mobile konsisten.
     */
-    const markerClick = marker.addListener("click", () => {
-      handleNodeClick(node, marker);
-    });
+    const handleMarkerClick=()=>{
+      handleNodeClick(node,marker);
+    };
+
+    marker.addEventListener(
+      "gmp-click",
+      handleMarkerClick,
+    );
 
     /*
     * =========================
@@ -1772,7 +1779,7 @@ export async function createNetworkMapEngine({
     );
 
     const removeListeners = () => {
-      markerClick.remove();
+      marker.removeEventListener("gmp-click",handleMarkerClick);
       markerDragStart.remove();
       markerDragEnd.remove();
     };

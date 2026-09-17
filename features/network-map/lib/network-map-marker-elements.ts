@@ -4,7 +4,7 @@
  * =========================
  * Membuat visual temporary network node.
  */
-export function createNodeElement(nodeType?:string){
+export function createNodeElement(nodeType?:string, code?:string){
   const element=document.createElement("div");
   element.style.width="42px";
   element.style.height="42px";
@@ -20,7 +20,7 @@ export function createNodeElement(nodeType?:string){
   element.style.cursor="pointer";
   element.style.userSelect="none";
   element.style.transition="transform 120ms ease,background 120ms ease";
-  applyNodeBaseStyle(element,nodeType);
+  applyNodeBaseStyle(element,nodeType,code);
   return element;
 }
 
@@ -54,24 +54,24 @@ export function createWaypointElement(index: number) {
  * NODE MARKER
  * =========================
  */
-function getNodeMarkerStyle(nodeType?:string){
+function getNodeMarkerStyle(nodeType?:string, code?:string){
   switch(nodeType){
-    case "ODP":return {label:"ODP",background:"#09090b",color:"#ffffff"};
-    case "ODC":return {label:"ODC",background:"#3f3f46",color:"#ffffff"};
-    case "OLT":return {label:"OLT",background:"#2563eb",color:"#ffffff"};
-    case "CUSTOMER":return {label:"CUST",background:"#2563eb",color:"#ffffff"};
-    case "ROUTER":return {label:"RTR",background:"#2563eb",color:"#ffffff"};
-    case "POLE":return {label:"POLE",background:"#64748b",color:"#ffffff"};
+    case "ODP":return {label:code,background:"#09090b",color:"#ffffff"};
+    case "ODC":return {label:code,background:"#3f3f46",color:"#ffffff"};
+    case "OLT":return {label:code,background:"#2563eb",color:"#ffffff"};
+    case "CUSTOMER":return {label:code,background:"#2563eb",color:"#ffffff"};
+    case "ROUTER":return {label:code,background:"#2563eb",color:"#ffffff"};
+    case "POLE":return {label:code,background:"#64748b",color:"#ffffff"};
     default:return {label:"NODE",background:"#2563eb",color:"#ffffff"};
   }
 }
 
-export function applyNodeBaseStyle(element:HTMLDivElement,nodeType?:string){
-  const style=getNodeMarkerStyle(nodeType);
+export function applyNodeBaseStyle(element:HTMLDivElement,nodeType?:string,code?:string){
+  const style=getNodeMarkerStyle(nodeType,code);
   element.dataset.nodeType=nodeType??"";
   element.dataset.baseBackground=style.background;
   element.dataset.baseColor=style.color;
-  element.textContent=style.label;
+  element.textContent=style.label??null;
   element.style.background=style.background;
   element.style.color=style.color;
 }
