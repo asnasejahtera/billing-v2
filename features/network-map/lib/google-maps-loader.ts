@@ -9,7 +9,7 @@ function configureGoogleMaps() {
   if (configured) return;
 
   const apiKey =
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    process.env.GOOGLE_MAPS_API_KEY;
 
   if (!apiKey) {
     throw new Error(
@@ -37,7 +37,7 @@ export async function loadMarkerLibrary() {
 
 export function getGoogleMapsMapId() {
   return (
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID ||
+    process.env.GOOGLE_MAPS_MAP_ID ||
     "DEMO_MAP_ID"
   );
 }
