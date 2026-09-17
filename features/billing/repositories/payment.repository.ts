@@ -96,12 +96,13 @@ export async function insertPayment(
 }
 
 // ============================================================================
-// Update Invoice Status
+// Update Invoice Payment Status
 // ============================================================================
 
 export async function updateInvoicePaymentStatus(
   invoiceId: number,
   status:
+    | "UNPAID"
     | "PARTIAL"
     | "PAID",
 ) {
@@ -109,8 +110,7 @@ export async function updateInvoicePaymentStatus(
     .update(invoices)
     .set({
       status,
-      updatedAt:
-        new Date(),
+      updatedAt: new Date(),
     })
     .where(
       eq(
@@ -521,6 +521,65 @@ export async function updatePaymentById(
       paymentNumber: payments.paymentNumber,
       invoiceId: payments.invoiceId,
       amount: payments.amount,
+    });
+
+  return rows[0] ?? null;
+}
+
+// ============================================================================
+// Find Payment for Delete
+// ============================================================================
+
+export async function findPaymentForDelete(
+  paymentId: number,
+) {
+  const rows = await db
+    .select({
+      id: payments.id,
+      paymentNumber: payments.paymentNumber,
+      invoiceId: payments.invoiceId,
+      amount: payments.amount,
+      invoiceTotal: invoices.total,
+      invoiceStatus: invoices.status,
+    })
+    .from(payments)
+    .innerJoin(
+      invoices,
+      eq(
+        invoices.id,
+        payments.invoiceId,
+      ),
+    )
+    .where(
+      eq(
+        payments.id,
+        paymentId,
+      ),
+    )
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+// ============================================================================
+// Delete Payment
+// ============================================================================
+
+export async function deletePaymentById(
+  paymentId: number,
+) {
+  const rows = await db
+    .delete(payments)
+    .where(
+      eq(
+        payments.id,
+        paymentId,
+      ),
+    )
+    .returning({
+      id: payments.id,
+      paymentNumber: payments.paymentNumber,
+      invoiceId: payments.invoiceId,
     });
 
   return rows[0] ?? null;

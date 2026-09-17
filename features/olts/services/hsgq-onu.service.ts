@@ -272,3 +272,56 @@ export async function getHsgqMergedRawData() {
     };
   });
 }
+
+// Parse nilai seperti "-17.7469 dBm" menjadi -17.7469.
+function parseOpticalNumber(
+  value: string | null | undefined,
+) {
+  if (!value) return null;
+
+  const parsed =
+    Number.parseFloat(value);
+
+  return Number.isFinite(parsed)
+    ? parsed
+    : null;
+}
+
+export async function getHsgqRxPower() {
+  const client = getClient();
+
+  const rows =
+    await client.getOpticalOnus(0);
+
+  return rows.map((row) => ({
+    portId: row.port_id,
+    onuId: row.onu_id,
+    macAddress: row.macaddr,
+    name: row.onu_name,
+
+    receivePowerDbm:
+      parseOpticalNumber(
+        row.receive_power,
+      ),
+
+    transmitPowerDbm:
+      parseOpticalNumber(
+        row.transmit_power,
+      ),
+
+    temperatureC:
+      parseOpticalNumber(
+        row.work_temprature,
+      ),
+
+    voltageV:
+      parseOpticalNumber(
+        row.work_voltage,
+      ),
+
+    transmitBiasMa:
+      parseOpticalNumber(
+        row.transmit_bias,
+      ),
+  }));
+}

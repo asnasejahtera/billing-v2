@@ -20,6 +20,7 @@ import {
 import { refreshHsgqOnuAction } from "@/features/olts/actions/refresh-hsgq-onu.action";
 import { HsgqOnuTable } from "@/features/olts/components/hsgq-onu-table";
 import type { HsgqOnuListResult } from "@/features/olts/types/hsgq-onu";
+import { UpdateRxPowerButton } from "@/features/olts/components/update-rx-power-button";
 
 interface Props {
     initialData: HsgqOnuListResult;
@@ -67,6 +68,75 @@ export function HsgqOnuMonitor({
         });
     }
 
+    /* =========================
+    * Apply latest optical data
+    * ========================= */
+    function handleRxUpdated(
+        rxRows: {
+            portId: number;
+            onuId: number;
+            receivePowerDbm: number | null;
+        }[],
+        updatedAt: string,
+    ) {
+        const rxMap = new Map(
+            rxRows.map((onu) => [
+                `${onu.portId}:${onu.onuId}`,
+                onu.receivePowerDbm,
+            ]),
+        );
+
+        setData((current) => {
+            const rows = current.data.map((onu) => {
+                const key =
+                    `${onu.portId}:${onu.onuId}`;
+
+                const rx =
+                    rxMap.get(key);
+
+                return {
+                    ...onu,
+                    receivePowerDbm:
+                        rx ?? onu.receivePowerDbm,
+                };
+            });
+
+            const powers = rows
+                .map((onu) => onu.receivePowerDbm)
+                .filter(
+                    (value): value is number =>
+                        value !== null,
+                );
+
+            return {
+                data: rows,
+                summary: {
+                    ...current.summary,
+                    averageRxPowerDbm:
+                        powers.length === 0
+                            ? null
+                            : powers.reduce(
+                                (sum, value) =>
+                                    sum + value,
+                                0,
+                            ) / powers.length,
+                },
+            };
+        });
+
+        setLastUpdated(
+            new Date(updatedAt),
+        );
+
+        setError(null);
+    }
+
+    function handleRxError(
+        message: string,
+    ) {
+        setError(message);
+    }
+
     const {
         total,
         online,
@@ -84,22 +154,30 @@ export function HsgqOnuMonitor({
                     </span>
                 </div>
 
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleRefresh}
-                    disabled={isPending}
-                >
-                    {isPending ? (
-                        <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                        <RefreshCw className="size-4" />
-                    )}
+                <div className="flex flex-wrap gap-2">
+                    <UpdateRxPowerButton
+                        disabled={isPending}
+                        onUpdated={handleRxUpdated}
+                        onError={handleRxError}
+                    />
 
-                    {isPending
-                        ? "Memperbarui..."
-                        : "Refresh Data"}
-                </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleRefresh}
+                        disabled={isPending}
+                    >
+                        {isPending ? (
+                            <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                            <RefreshCw className="size-4" />
+                        )}
+
+                        {isPending
+                            ? "Memperbarui..."
+                            : "Refresh Data"}
+                    </Button>
+                </div>
             </div>
 
             {error && (

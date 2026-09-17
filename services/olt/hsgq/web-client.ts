@@ -6,6 +6,7 @@ import type {
   HsgqOnuRaw,
   HsgqWebClientConfig,
   HsgqPonMacRaw,
+  HsgqOpticalOnuRaw,
   HsgqOnuDto,
   HsgqOnuListResult,
   HsgqOnuRow,
@@ -73,6 +74,32 @@ export class HsgqWebClient {
   } finally {
     this.loginPromise = null;
   }
+}
+
+// Optical ONU — port_id=0 membaca seluruh ONU.
+async getOpticalOnus(
+  portId = 0,
+): Promise<HsgqOpticalOnuRaw[]> {
+  const query = new URLSearchParams({
+    form: "optical_onu",
+    port_id: String(portId),
+  });
+
+  const result =
+    await this.authenticatedGet<HsgqOpticalOnuRaw[]>(
+      `/ponmgmt?${query.toString()}`,
+    );
+
+  if (result.code !== 1) {
+    throw new Error(
+      result.message ||
+        "Gagal mengambil optical power HSGQ",
+    );
+  }
+
+  return Array.isArray(result.data)
+    ? result.data
+    : [];
 }
 
 private async performLogin(): Promise<string> {

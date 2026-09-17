@@ -493,10 +493,16 @@ function CustomerRow({
 
                 <TableCell>
                     <span className="font-mono text-sm">
-                        {customer.ipAddress ??
-                            "-"}
+                        {customer.remoteAddress ? (
+                            <a href={`http://${customer.remoteAddress}`} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                {customer.ipAddress}
+                            </a>
+                        ) : (
+                            "-"
+                        )}
                     </span>
                 </TableCell>
+
 
                 {/* ROUTER */}
 

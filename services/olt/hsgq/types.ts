@@ -97,3 +97,15 @@ export interface HsgqPonMac {
 export type HsgqOnuRow = HsgqOnuDto & {
   ponMacs: HsgqPonMac[];
 };
+
+export interface HsgqOpticalOnuRaw {
+  port_id: number;
+  onu_id: number;
+  macaddr: string;
+  onu_name: string;
+  work_temprature: string;
+  work_voltage: string;
+  transmit_bias: string;
+  transmit_power: string;
+  receive_power: string;
+}

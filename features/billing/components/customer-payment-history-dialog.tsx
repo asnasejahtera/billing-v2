@@ -32,6 +32,9 @@ import {
 import {
     EditPaymentDialog,
 } from "./edit-payment-dialog";
+import {
+    DeletePaymentDialog,
+} from "./delete-payment-dialog";
 
 // ============================================================================
 // Types
@@ -419,6 +422,18 @@ export function CustomerPaymentHistoryDialog({
                                                                                     payment.status,
                                                                             }}
                                                                             onUpdated={
+                                                                                loadHistory
+                                                                            }
+                                                                        />
+
+                                                                        <DeletePaymentDialog
+                                                                            payment={{
+                                                                                id:
+                                                                                    payment.id,
+                                                                                paymentNumber:
+                                                                                    payment.paymentNumber,
+                                                                            }}
+                                                                            onDeleted={
                                                                                 loadHistory
                                                                             }
                                                                         />

@@ -33,7 +33,7 @@ import {
 import {
     Textarea,
 } from "@/components/ui/textarea";
-
+import { CurrencyInput } from "@/components/ui/currency-input";
 // ============================================================================
 // Types
 // ============================================================================
@@ -158,20 +158,39 @@ export function EditPaymentDialog({
         );
     }
 
+    function handleOpen() {
+        setAmount(
+            Number(payment.amount).toString(),
+        );
+
+        setPaymentDate(
+            payment.paymentDate,
+        );
+
+        setMethod(
+            payment.method,
+        );
+
+        setReferenceNumber(
+            payment.referenceNumber ?? "",
+        );
+
+        setNotes(
+            payment.notes ?? "",
+        );
+
+        setError(null);
+        setOpen(true);
+    }
+
     return (
         <>
             <Button
                 type="button"
                 size="sm"
                 variant="outline"
-                disabled={
-                    payment.status !==
-                    "SUCCESS"
-                }
-                onClick={() => {
-                    setError(null);
-                    setOpen(true);
-                }}
+                disabled={payment.status !== "SUCCESS"}
+                onClick={handleOpen}
             >
                 <Pencil />
                 Edit
@@ -203,22 +222,11 @@ export function EditPaymentDialog({
                                 Jumlah Bayar
                             </Label>
 
-                            <Input
-                                type="number"
-                                min="1"
-                                step="1"
+                            <CurrencyInput
+                                id={`edit-payment-amount-${payment.id}`}
                                 value={amount}
-                                disabled={
-                                    isPending
-                                }
-                                onChange={(
-                                    event,
-                                ) =>
-                                    setAmount(
-                                        event.target
-                                            .value,
-                                    )
-                                }
+                                disabled={isPending}
+                                onValueChange={setAmount}
                             />
                         </div>
 
@@ -362,7 +370,7 @@ export function EditPaymentDialog({
                             disabled={
                                 isPending ||
                                 !amount ||
-                                Number(amount) <= 0 ||
+                                Number(amount) < 0 ||
                                 !paymentDate
                             }
                             onClick={

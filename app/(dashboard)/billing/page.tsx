@@ -16,6 +16,9 @@ import {
 import {
     listManualInvoiceCustomersService,
 } from "@/features/billing/services/manual-invoice.service";
+import {
+    ExportInvoiceInstallmentDialog,
+} from "@/features/billing/components/export-invoice-installment-dialog";
 
 // ============================================================================
 // Types
@@ -116,7 +119,7 @@ export default async function BillingPage({
                             customers
                         }
                     />
-
+                    <ExportInvoiceInstallmentDialog />
                     <GenerateInvoiceDialog />
                 </div>
             </div>

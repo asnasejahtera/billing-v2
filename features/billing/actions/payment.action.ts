@@ -9,6 +9,7 @@ import {
   customerPaymentInvoicesSchema,
   editPaymentSchema,
   paymentHistorySchema,
+  deletePaymentSchema
 } from "../schemas/payment.schema";
 
 import {
@@ -16,11 +17,12 @@ import {
   editPaymentService,
   listCustomerOutstandingInvoicesService,
   listCustomerPaymentHistoryService,
+  deletePaymentService
 } from "../services/payment.service";
+
 // ============================================================================
 // Result
 // ============================================================================
-
 export type CreatePaymentActionResult =
   | {
       success: true;
@@ -244,6 +246,76 @@ export async function editPaymentAction(
         error instanceof Error
           ? error.message
           : "Gagal memperbarui pembayaran.",
+    };
+  }
+}
+
+
+// ============================================================================
+// Delete Payment
+// ============================================================================
+
+export async function deletePaymentAction(
+  input: unknown,
+) {
+  const parsed =
+    deletePaymentSchema.safeParse(
+      input,
+    );
+
+  if (!parsed.success) {
+    return {
+      success:
+        false as const,
+      message:
+        parsed.error
+          .issues[0]
+          ?.message ??
+        "Data pembayaran tidak valid.",
+    };
+  }
+
+  try {
+    const result =
+      await deletePaymentService(
+        parsed.data,
+      );
+
+    revalidatePath(
+      "/billing",
+    );
+
+    revalidatePath(
+      "/billing/payments",
+    );
+
+    return {
+      success:
+        true as const,
+
+      message:
+        "Pembayaran berhasil dihapus.",
+
+      data: {
+        invoiceId:
+          result.invoiceId,
+        invoiceStatus:
+          result.invoiceStatus,
+        paidAmount:
+          result.paidAmount,
+        remainingAmount:
+          result.remainingAmount,
+      },
+    };
+  } catch (error) {
+    return {
+      success:
+        false as const,
+
+      message:
+        error instanceof Error
+          ? error.message
+          : "Gagal menghapus pembayaran.",
     };
   }
 }

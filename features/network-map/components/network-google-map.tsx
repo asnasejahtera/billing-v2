@@ -79,6 +79,7 @@ import { EditFiberLinkDialog } from "./edit-fiber-link-dialog";
 import { FiberCoreConnectionDialog } from "./fiber-core-connection-dialog";
 import { NetworkNodeDetailDialog } from "./network-node-detail-dialog";
 import { EditDistributionTopologyNodeDialog } from "./edit-distribution-topology-node-dialog";
+import { UpdateRxPowerButton } from "@/features/olts/components/update-rx-power-button";
 
 type NetworkGoogleMapProps = {
     initialNodes?: NetworkMapNodeDto[];
@@ -660,6 +661,20 @@ export function NetworkGoogleMap({ initialNodes, initialLinks, createOptions }: 
                     value={nodeStatusFilter}
                     disabled={toolMode !== "NORMAL"}
                     onChange={handleNodeStatusFilter}
+                />
+                <UpdateRxPowerButton
+                    disabled={toolMode !== "NORMAL"}
+                    onUpdated={(data, updatedAt) => {
+                        /*
+                         * data = seluruh hasil RX ONU.
+                         * Tahap berikutnya kita sinkronkan
+                         * hasil ini ke marker CUSTOMER.
+                         */
+                        console.log("RX updated", data, updatedAt);
+                    }}
+                    onError={(message) => {
+                        console.error(message);
+                    }}
                 />
             </div>
 

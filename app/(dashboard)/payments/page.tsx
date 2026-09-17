@@ -15,6 +15,12 @@ import {
 import {
     PaymentSummary,
 } from "@/features/billing/components/payment-summary";
+import {
+    ExportBillingExcelDialog,
+} from "@/features/billing/components/export-billing-excel-dialog";
+import {
+    ExportPaymentRecapDialog,
+} from "@/features/billing/components/export-payment-recap-dialog";
 // ============================================================================
 // Types
 // ============================================================================
@@ -183,14 +189,21 @@ export default async function PaymentsPage({
             {/* Header */}
             {/* ================================================================ */}
 
-            <div>
-                <h1 className="text-2xl font-semibold tracking-tight">
-                    Pembayaran
-                </h1>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold tracking-tight">
+                        Pembayaran
+                    </h1>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                    Pembayaran dan kurang bayar customer.
-                </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Pembayaran dan kurang bayar customer.
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                    <ExportBillingExcelDialog />
+                    <ExportPaymentRecapDialog />
+                </div>
             </div>
 
             {/* ================================================================ */}

@@ -15,12 +15,19 @@ import type {
   CreatePaymentInput,
   EditPaymentInput,
 } from "../schemas/payment.schema";
+import {
+  deletePaymentById,
+  findPaymentForDelete,
+} from "../repositories/payment.repository";
 
+
+import type {
+  DeletePaymentInput,
+} from "../schemas/payment.schema";
 
 // ============================================================================
 // Payment Number
 // ============================================================================
-
 function createPaymentNumber(
   paymentDate: string,
 ) {
@@ -401,5 +408,101 @@ export async function editPaymentService(
     paidAmount,
     remainingAmount,
     invoiceStatus,
+  };
+}
+
+// ============================================================================
+// Delete Payment + Recalculate Invoice
+// ============================================================================
+
+export async function deletePaymentService(
+  input: DeletePaymentInput,
+) {
+  // --------------------------------------------------------------------------
+  // Find Payment
+  // --------------------------------------------------------------------------
+
+  const payment =
+    await findPaymentForDelete(
+      input.id,
+    );
+
+  if (!payment) {
+    throw new Error(
+      "Pembayaran tidak ditemukan.",
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // Delete Payment
+  // --------------------------------------------------------------------------
+
+  const deleted =
+    await deletePaymentById(
+      payment.id,
+    );
+
+  if (!deleted) {
+    throw new Error(
+      "Pembayaran gagal dihapus.",
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // Recalculate Invoice
+  // --------------------------------------------------------------------------
+
+  const paidAmount =
+    Number(
+      await getInvoicePaidAmount(
+        payment.invoiceId,
+      ),
+    );
+
+  const invoiceTotal =
+    Number(
+      payment.invoiceTotal,
+    );
+
+  const remainingAmount =
+    Math.max(
+      invoiceTotal -
+        paidAmount,
+      0,
+    );
+
+  const invoiceStatus:
+    | "UNPAID"
+    | "PARTIAL"
+    | "PAID" =
+    paidAmount <= 0
+      ? "UNPAID"
+      : paidAmount >=
+          invoiceTotal
+        ? "PAID"
+        : "PARTIAL";
+
+  // Invoice VOID jangan dihidupkan lagi.
+  if (
+    payment.invoiceStatus !==
+    "VOID"
+  ) {
+    await updateInvoicePaymentStatus(
+      payment.invoiceId,
+      invoiceStatus,
+    );
+  }
+
+  return {
+    deleted,
+    invoiceId:
+      payment.invoiceId,
+    invoiceStatus:
+      payment.invoiceStatus ===
+      "VOID"
+        ? "VOID"
+        : invoiceStatus,
+    paidAmount,
+    remainingAmount,
   };
 }

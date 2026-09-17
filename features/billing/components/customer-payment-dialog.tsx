@@ -18,6 +18,7 @@ import {
 } from "../utils/format-currency";
 
 import { Button } from "@/components/ui/button";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import {
     Dialog,
     DialogContent,
@@ -451,29 +452,11 @@ export function CustomerPaymentDialog({
                                 Jumlah Bayar
                             </Label>
 
-                            <Input
-                                type="number"
-                                min="1"
-                                max={
-                                    selectedInvoice
-                                        ? Number(
-                                            selectedInvoice.remainingAmount,
-                                        )
-                                        : undefined
-                                }
+                            <CurrencyInput
+                                id="payment-amount"
                                 value={amount}
-                                disabled={
-                                    isPending ||
-                                    !selectedInvoice
-                                }
-                                onChange={(
-                                    event,
-                                ) =>
-                                    setAmount(
-                                        event.target
-                                            .value,
-                                    )
-                                }
+                                disabled={isPending}
+                                onValueChange={setAmount}
                             />
 
                             {selectedInvoice && (

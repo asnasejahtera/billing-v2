@@ -141,12 +141,6 @@ export function PaymentCustomerTable({
                                         )}
                                     </td>
 
-                                    <td className="px-4 py-3 text-right font-semibold">
-                                        {formatCurrency(
-                                            customer.outstanding,
-                                        )}
-                                    </td>
-
                                     <td className="px-4 py-3 text-right">
                                         {Number(
                                             customer.overdue,

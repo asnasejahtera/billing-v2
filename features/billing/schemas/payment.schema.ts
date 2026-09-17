@@ -110,3 +110,21 @@ export const editPaymentSchema = z.object({
 
 export type EditPaymentInput =
   z.infer<typeof editPaymentSchema>;
+
+// ============================================================================
+// Delete Payment
+// ============================================================================
+
+export const deletePaymentSchema =
+  z.object({
+    id: z.coerce
+      .number()
+      .int()
+      .positive(),
+  });
+
+export type DeletePaymentInput =
+  z.infer<
+    typeof deletePaymentSchema
+  >;
+
