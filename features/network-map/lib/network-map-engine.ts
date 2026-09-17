@@ -1648,18 +1648,88 @@ export async function createNetworkMapEngine({
 
     /*
     * =========================
-    * NODE CLICK / MOBILE TAP
+    * NODE TAP / CLICK
     * =========================
-    * AdvancedMarkerElement menggunakan
-    * gmp-click agar tap mobile konsisten.
+    * Mobile:
+    * - tap pendek = buka InfoWindow
+    * - pointer bergerak = drag, jangan buka InfoWindow
+    *
+    * Desktop:
+    * - tetap gunakan gmp-click
     */
+    let isNodeDragging=false;
+    let touchStart:{
+      pointerId:number;
+      x:number;
+      y:number;
+    }|null=null;
+    let suppressClickUntil=0;
+
     const handleMarkerClick=()=>{
+      if(isNodeDragging)return;
+      if(Date.now()<suppressClickUntil)return;
       handleNodeClick(node,marker);
+    };
+
+    const handleTouchStart=(event:PointerEvent)=>{
+      if(event.pointerType!=="touch")return;
+
+      touchStart={
+        pointerId:event.pointerId,
+        x:event.clientX,
+        y:event.clientY,
+      };
+    };
+
+    const handleTouchEnd=(event:PointerEvent)=>{
+      if(
+        event.pointerType!=="touch"||
+        !touchStart||
+        touchStart.pointerId!==event.pointerId
+      )return;
+
+      const distance=Math.hypot(
+        event.clientX-touchStart.x,
+        event.clientY-touchStart.y,
+      );
+
+      touchStart=null;
+
+      /*
+      * Gerakan lebih dari 10px dianggap drag.
+      */
+      if(isNodeDragging||distance>10)return;
+
+      /*
+      * Cegah gmp-click kedua setelah touch tap.
+      */
+      suppressClickUntil=Date.now()+500;
+
+      handleNodeClick(node,marker);
+    };
+
+    const handleTouchCancel=()=>{
+      touchStart=null;
     };
 
     marker.addEventListener(
       "gmp-click",
       handleMarkerClick,
+    );
+
+    element.addEventListener(
+      "pointerdown",
+      handleTouchStart,
+    );
+
+    element.addEventListener(
+      "pointerup",
+      handleTouchEnd,
+    );
+
+    element.addEventListener(
+      "pointercancel",
+      handleTouchCancel,
     );
 
     /*

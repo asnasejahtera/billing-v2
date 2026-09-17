@@ -41,7 +41,7 @@ const navigation = [
     items: [
       {
         title: "Dashboard",
-        href: "/dashboard",
+        href: "/",
         icon: Gauge,
       },
     ],
