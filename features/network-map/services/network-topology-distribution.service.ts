@@ -74,6 +74,7 @@ export async function createDistributionTopologyNodeService(
       oltId:null,
       distributionDeviceId:device.id,
       customerId:null,
+      customerInfo:null,
       portSummary:{
         inputTotal:1,
         inputAvailable:1,
@@ -243,6 +244,7 @@ function distributionDetailToMapNode(
     oltId:null,
     distributionDeviceId:detail.deviceId,
     customerId:null,
+    customerInfo:null,
     portSummary:{
       inputTotal:inputs.length,
       inputAvailable:inputs.filter((port)=>port.status==="AVAILABLE").length,

@@ -32,7 +32,7 @@ type EditNetworkNodeDialogProps = {
     open: boolean;
     node: NetworkMapNodeEditTarget | null;
     onOpenChange: (open: boolean) => void;
-    onUpdated: (node: NetworkMapNodeDto) => void;
+    onUpdated: (node: any) => void;
 };
 
 export function EditNetworkNodeDialog({
