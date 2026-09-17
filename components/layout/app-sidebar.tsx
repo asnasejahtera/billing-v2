@@ -60,8 +60,8 @@ const navigation = [
         icon: Package,
       },
       {
-        title: "Invoice",
-        href: "/invoices",
+        title: "Billing",
+        href: "/billing",
         icon: ReceiptText,
       },
       {
